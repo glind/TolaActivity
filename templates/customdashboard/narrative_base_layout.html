@@ -1,0 +1,270 @@
+{% load staticfiles %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Mercy Corps Public Dashboard">
+        <meta name="author" content="Mercy Corps">
+
+        <!-- <title>{% block title %} Program Dashboard {% endblock %}</title> -->
+
+        <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.png" type="image/png">
+
+        <!-- Bootstrap -->
+        <link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="{{ STATIC_URL}}css/tola-dashboard.css" rel="stylesheet" type="text/css" />
+        <!-- JQuery UI CSS -->
+        <link href="{{ STATIC_URL }}css/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+        <!-- Custom Narrative Layout CSS -->
+        <link href="{{ STATIC_URL }}css/narrative_layout.css" rel="stylesheet" type="text/css">
+        <!-- Custom Footer CSS -->
+        <link href="{{ STATIC_URL }}css/app.css" rel="stylesheet" type="text/css">
+        <!-- - Hosted Leaflet CSS --> 
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/leaflet.css">
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins)  -->
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.js"></script>
+        <!-- <!- Hosted Leaflet -->
+        <script src="{{ STATIC_URL }}js/leaflet.js"></script>
+
+    </head>
+
+<body style='background-color:#4d525a;'>
+<!-- insert navbar -->
+    <nav class = "navbar navbar-inverse navbar-fixed-top heavy-black-shadow" role = "navigation" style='background-color:#4d525a; color: white; padding: .5em .25em 1.25em 1em; margin: 0; ' >
+           
+           <div class = "navbar-header" style='float: left;'>
+              <button type = "button" class = "navbar-toggle" 
+                 data-toggle = "collapse" data-target = "#rrima-navbar-collapse">
+                 <span class = "sr-only">Toggle navigation</span>
+                 <span class = "icon-bar">
+                                <ul class = "dropdown-menu"">
+        <!--                <li><a href = "#report1"><span class="glyphicon glyphicon-stats"></span> Report 1</a></li>
+                       <li><a href = "#report2"><span class="glyphicon glyphicon-stats"></span> Report 2</a></li>
+                       <li><a href = "#report3"><span class="glyphicon glyphicon-stats"></span> Report 3</a></li>
+                       <li><a href = "#report4"><span class="glyphicon glyphicon-stats"></span> Report 4</a></li>
+                       <li><a href = "#report5"><span class="glyphicon glyphicon-stats"></span> Report 5</a></li> -->
+                    </ul>
+                 </span>
+                 <span class = "icon-bar"></span>
+                 <span class = "icon-bar"></span>
+              </button>
+                
+               
+           </div>
+           
+           <div class = "collapse navbar-collapse" id = "rrima-navbar-collapse">
+            
+              <ul class = "nav navbar-nav red-solid black-shadow" style='float: left; border-radius:0.313em; text-align: left; padding: 0em 1.5em .5em 1.5em; '>
+                 <li class='col-lg-1 col-md-1 col-sm-1' style="padding-left:.25em; float: left;"><a href="#projectHome"><span class="glyphicon glyphicon-home"></span> </a></li>
+                 <li class = "dropdown col-lg-6 col-md-6 col-sm-6" style="padding-left:.25em; float: left;">
+                    <a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">
+                       RRIMA REPORTS<b class = "caret"></b>
+                    </a>
+                    
+                    <ul class = "dropdown-menu"">
+                        {% for report in report.series %}
+                       <li><a href = "#report{{report.id}}"><span class="glyphicon glyphicon-stats"></span> Report {{report.id}}/a></li>
+                    </ul>
+                    
+                 <li class = "dropdown col-lg-5 col-md-5 col-sm-5" style="padding:0; float: left;">
+                    <a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">
+                       MORE
+                       <b class = "caret"></b>
+                    </a>
+                    
+                    <ul class = "dropdown-menu">
+                       <li><a href="#timeline"><span class="glyphicon glyphicon-film"></span> Timeline</a></li>
+                       <li><a href="#programhub"><span class="glyphicon glyphicon-picture"></span> Program Hub</a></li>
+                       <li><a href="#newsresources"><span class="glyphicon glyphicon-paperclip"></span> News Resources</a></li>
+                    </ul>
+                    
+                 </li>
+                    
+              </ul>
+              <div class='col-lg-6 col-md-6 col-sm-6 red-solid black-shadow' style='border-radius:0.313em; text-align: left; margin: 0.5em 2em 0em .5em; padding: 0em 1.5em .5em 1.5em; float: right'> <h2>RRIMA Refugee & Migration News</h2></div>
+           </div>
+           
+           
+     </nav>
+
+<!-- main container goes here/ add basic grid system layout here -->
+            <div class="tab-content">
+                <div id="menu0" class="tab-pane fade in active">
+                    <div class='container-fluid col-lg-12 dark-white-gradient wide-width-padding'>
+
+                        <div class='row' style='padding: 1em 0 1em 0;'>
+                            <div class='col-lg-9 col-md-12 col-sm-12' style='height: 100; overflow-y: scroll; color: #4d525a; padding-left: 3em; padding-bottom: 2em; padding-right: 4em; text-align: left;' >
+                                <h3 id="projectHome">{{pageText.projectSummary.title}}</h3>
+                                {% if partner_funding %}
+                                <p>With <a href="{{partner_funding.url}}" style="color: #0065a2;"><u>{{partner_funding.name}}</u></a> funding, <strong>Mercy Corps’ {{parner_funding.MC_project_name}}</strong> team aims to:</p>
+                                <div class='row' style='margin-left: 2em; margin-right: 4em; padding: 1em 2em 1em 2em; '>
+                                    <div style='text-align: center;'>
+                                        {% for objective in partner_funding.objectives}
+                                        <span class='highlight-title'>
+                                            <strong>{{objective}} </strong>
+                                        </span>
+                                        <span style='color: black;'>{{objective.description}}, </span>
+                                    </div>                  
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class='col-lg-3 col-md-4 col-sm-6 col-xs-6' style='background-color: white; padding: 0em 2em 0em 2em; margin-top: 2em; float:left'>
+                                <div class="panel-body">
+                                    <img src='{{parner_funding.logo}}' style='background-color: white; height: 7.813em; padding: .5em 0 .5em .5em; float: right; border: none;'>
+                                    <img src="{{STATIC_URL}}/img/MC_Logo.png" style='background-color: white; height: 7.813em; padding: .5em; float: right; border: none;'>
+                                
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-bottom-padding'>
+                        <div class='row' >
+                            <!-- <div class='col-lg-1'></div> -->
+                            <div class='col-lg-12' style="height: 150; padding-bottom: 2em;">
+                                <h3 id="programhub" style='text-align: right;'>{{locations.title}}</h3>
+                                <div style='padding-bottom: 2em;'><h4><strong>{{locations.subtitle}}</strong></h4>
+                               {{locations.summary_text}}</div>
+                                {% with pageMap as tolaMapData %}
+                                    {% include 'customdashboard/rrima_components/rrima_map.html' %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-padding'>
+                        <div class='row'>
+                            <div class='col-lg-10 col-md-12 col-sm-12' style='border-radius: 0.313em; float: left; width:100%; overflow-y: scroll; box-shadow: 0.063em 0.063em 0.063em 0.063em #8b8b8b inset;'>
+                                <h3 id="timeline">{{timeline.title}}</h3>
+                                <div style='padding-bottom: 1.5em;'>{{timelines.summary}}</div>
+                                <iframe src='{{timeline.link}}' width='1000' height='450' frameborder='0' style="padding-left: 9em;"></iframe>
+                            </div>
+                            <div class='col-lg-1'></div>
+                        </div>
+                    </div>
+                    <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-padding'>
+                        {% for report in report.series %}
+                        <div class='row'>
+                            <div class='col-lg-9 col-md-12 col-sm-12' style='padding: 0em 2em 0em 0em;'>
+                                <h3 id="report{{report.id}}">{{report.title|caps}}</h3>
+                                {% for text in report.text %}
+                                    <p> text </p>
+                                {% endfor %}
+                                {% if report.resource_links %}
+                                <div style='padding: 1em 0 1em 0;'>
+                                    <ul style='list-style: none;'><strong>A Deeper Look...</strong>
+                                        {% for link in report.resource_links %}
+                                        <li><a href='{{link.url}}'>{{link.title}}</a></li> 
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class='col-lg-3 col-md-3  col-sm-6 col-xs-12 no-padding' style=''>
+                                <div class='panel red-gradient button-selector' style='margin-top: 3em; padding: .5em .5em 2em .5em;'>
+                                    <div class='panel-body' style='padding-top: 0em;'><a src="{{report.url}}" data-toggle="modal" href="#reportModal" style='color: white; text-align: left; width: 100%;'>{{report.name|sentence}}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>      
+
+                    <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-bottom-padding'>
+                        <div style='width: 100%; padding: 0em 2em 0em 0;'>
+                            <h3 id="newsresources" style='padding: 1em 0 1em 0;'>{{newsFeed.title}}</h3>
+                            <ul style='width: 100%;'>
+                            {% for newsLink in newsFeed %}
+                                <li class='col-lg-3 col-md-4 col-sm-6 col-xs-12' style='list-style: none;'>
+                                    <div class='panel red-gradient button-selector'><div class='panel-body' style='padding-top: 0em;'><a href='{{news.url}}' style='color: white; text-align: left; width: 100%;'>{{news.title|caps}}</a><br></div>
+                                    </div>
+                                </li>
+                             </ul>
+                        </div>
+                    <div class='container-fluid'></div>
+
+            <!-- ***** PAGE MODALS ********* -->
+                    <!-- Household Profile Modal -->
+                    <div id="householdModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newsModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-wide-display" role="document">
+
+                        <!-- Modal content-->
+                        <div class="modal-content modal-full-height">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <strong><h3 class="modal-title"> Household Profile</h3></strong>
+                          </div>
+                          <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
+                            Profile Goes Here
+                          </div>
+            <!--              <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          </div> -->
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Jupyter Report Modal -->
+                    <div id="reportModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newsModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-wide-display" role="document">
+
+                        <!-- Modal content-->
+                        <div class="modal-content modal-full-height">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <strong><h3 class="modal-title"> RRIMA Report</h3></strong>
+                          </div>
+                          <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
+                            <iframe style="position: absolute; height: 100%; top: 0; right: 0; border: none; width: 100%;" src="/media/{{ getNotebook.file }}"></iframe><
+                          </div>
+            <!--              <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          </div> -->
+                        </div>
+                      </div>
+                    </div>
+                    {% if newsDisplay %}
+                    <div id="newsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newsModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-wide-display" role="document">
+
+                        <!-- Modal content-->
+                        <div class="modal-content modal-full-height">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <strong><h3 class="modal-title">{{newsDisplay.title}}</h3></strong>
+                          </div>
+                          <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
+                            <div>
+                                <h3><a href="{{news.link}}">{{news.title|caps}}</a></h3>
+                                <p>{{news.summary}}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+    <!-- footer -->
+        <div id="footer">
+            <!-- Sticky Footer -->
+            <div class="container">
+                <div class="col-md-6 text-left">
+                    <a href="http://www.toladata.com" class="text-muted"><b>Tola</b>Data: Built by</a> <a href="http://www.mercycorps.org" class="text-muted">MercyCorps</a>
+                </div>
+                <div class="col-md-6 text-right">
+                    <a href="http://tola.work/documentation" class="text-muted">Documentation</a> | <a href="http://tola.work/faq" class="text-muted">FAQ</a> | <a href="http://tola.work/helpdesk/tickets/submit/" class="text-muted">Feedback</a> | <a href="https://github.com/toladata/TolaActivity/blob/master/LICENSE" class="text-muted">License</a>
+                </div>
+            </div>
+        </div><!-- .footer collapse -->
+
+      
+        <!-- <!- {% block extra_js_in_body %} --> 
+        <!-- {% endblock %} -->
+    </body>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+</html>

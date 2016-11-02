@@ -352,19 +352,19 @@ class CustomDashboardUpdate(UpdateView):
 
     def form_valid(self, form):
         check_form_type = self.request.get_full_path()
-        #TODO: Once refactoring is done, revisit whether checking form type still needed
-        # if check_form_type.startswith('/confirgureabledashboard/map'):
-        #     getCustomDashboard.component_map = form.cleaned_data['component_map']
-        #     getCustomDashboard.save()
-            # for position in getCustomDashboard.component_map:
-            #     mapped_position = form.component_map.0
-            #     if position.0 == mapped_position:
-            #         position.1 == form.component_map.1
-            #         mapped = true
-            # if mapped != true:
-            #     getCustomDashboard.component_map.append(form.component_map)
-        # else:
-        form.save()
+
+        if check_form_type.startswith('/configurabledashboard/map'):
+            getCustomDashboard=CustomDashboard.objects.get(id=form.cleaned_data['dashboard_id'])
+            if getCustomDashboard.component_map:
+                parsedComponentMap = json.loads(getCustomDashboard.component_map)
+                parsedComponentMap[{{form.cleaned_data['template_location']}}]= form.cleaned_data['component_selected']
+                getCustomDashboard.component_map = json.dumps(parsedComponentMap)
+            else:
+                map_entry = "{{form.cleaned_data['template_location']}}" + " : " + "form.cleaned_data['component_selected']"
+                getCustomDashboard.component_map.append(map_entry)
+            getCustomDashboard.save()
+        else:
+            form.save()
         messages.success(self.request, 'Success, CustomDashboard Output Updated!')
 
         return self.render_to_response(self.get_context_data(form=form))

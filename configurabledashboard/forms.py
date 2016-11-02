@@ -177,7 +177,6 @@ class CustomDashboardForm(forms.ModelForm):
                                                                         <option value=0> None </option>
                                                                     {% endfor %}
                                                                 </select>
-                                                                <noscript><input type="submit" value="Submit"></noscript>
                                                             </form>
                                                         </div>
                                                     </td>

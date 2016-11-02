@@ -164,16 +164,21 @@ class CustomDashboardForm(forms.ModelForm):
                                                     <td> {{key}} </td>
                                                     <td> {{value}} </td>
                                                     <td> {{getCustomDashboard.componentset}} 
-                                                        <div class="form-group"> 
-                                                            <select class="form-control" id="sel1">
-                                                            {% for component in getDashboardComponents %}
-                                                                {% if component.component_type == value %}
-                                                                    <option value={{component.id}}> {{component.component_name}} </option>
-                                                                {% endif %}
-                                                            {% empty %}
-                                                                <option value=0> None </option>
-                                                            {% endfor %}
-                                                            </select>
+                                                        <div class="form-group">
+                                                            <form id='componentMapForm' name=componentMapForm action='configurabledashboard/map/{{getCustomDashboard.id}}' method=POST> 
+                                                                <input type='hidden' name='dashboard_id' value='{{getCustomDashboard.id}}'>
+                                                                <input type='hidden' name='template_location' value='{{key}}'>
+                                                                <select class="form-control" name="component_selected" size=1 id="select-component" onselect='this.form.submit()'>
+                                                                    {% for component in getDashboardComponents %}
+                                                                        {% if component.component_type == value %}
+                                                                            <option value={{component.id}}> {{component.component_name}} </option>
+                                                                        {% endif %}
+                                                                    {% empty %}
+                                                                        <option value=0> None </option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                                <noscript><input type="submit" value="Submit"></noscript>
+                                                            </form>
                                                         </div>
                                                     </td>
                                                     <td></td>
@@ -189,7 +194,7 @@ class CustomDashboardForm(forms.ModelForm):
                             </div>
                             </div>
                                 <div>
-                                    <a class="btn btn-primary" data-target="#add-dashboard-data-sources" data-toggle="tab">Next Step: Add Data Sources</a>
+                                    <a class="btn btn-primary" data-target="#add-data-sources" data-toggle="tab">Next Step: Add Data Sources</a>
                                 </div>
                             </div>
                             """),
@@ -277,7 +282,7 @@ class CustomDashboardForm(forms.ModelForm):
                                         </table>
                                     <div>
                                     <div class="panel panel-footer">Don't see your data source or need to edit an existing data source?<br>
-                                        <a class="dashboards" data-toggle="modal" data-target="#myModal" href='../../custom_dashboard/data/{{pk}}/'> View All Data Sources</a></td>
+                                        <a class="dashboards" data-toggle="modal" data-target="#myModal" href='/configurabledashboard/data/{{pk}}/'> View All Data Sources</a></td>
                                     </div>
                                 </div>
                             </div>

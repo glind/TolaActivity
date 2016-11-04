@@ -92,7 +92,12 @@ class CustomDashboardCreate(CreateView):
         return self.render_to_response(self.get_context_data(form=form))
 
     def form_valid(self, form):
-        print form
+        getSelectedTheme = DashboardTheme.objects.all().filter(id=form[cleaned_data][theme].id)
+        parsedLayout = json.loads(getSelectedTheme[0].layout_dictionary, object_pairs_hook=OrderedDict)
+        new_map = {}
+        for key, value in parsedLayout:
+            new_map[key] = ""
+        form[cleaned_data[[component_map] = json.dumps(new_map)
         form.save()
 
         #save formset from context
@@ -353,18 +358,7 @@ class CustomDashboardUpdate(UpdateView):
     def form_valid(self, form):
         check_form_type = self.request.get_full_path()
 
-        if check_form_type.startswith('/configurabledashboard/map'):
-            getCustomDashboard=CustomDashboard.objects.get(id=form.cleaned_data['dashboard_id'])
-            if getCustomDashboard.component_map:
-                parsedComponentMap = json.loads(getCustomDashboard.component_map)
-                parsedComponentMap[{{form.cleaned_data['template_location']}}]= form.cleaned_data['component_selected']
-                getCustomDashboard.component_map = json.dumps(parsedComponentMap)
-            else:
-                map_entry = "{{form.cleaned_data['template_location']}}" + " : " + "form.cleaned_data['component_selected']"
-                getCustomDashboard.component_map.append(map_entry)
-            getCustomDashboard.save()
-        else:
-            form.save()
+        form.save()
         messages.success(self.request, 'Success, CustomDashboard Output Updated!')
 
         return self.render_to_response(self.get_context_data(form=form))

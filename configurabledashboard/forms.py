@@ -205,7 +205,7 @@ class CustomDashboardForm(forms.ModelForm):
                         HTML("""
                             <div class='panel panel-default'>
                                 <div class='panel panel-heading'>Assigned Data Sources</div>
-                                <div class='panel panel-body'>Layout Image for your Theme Goes Here<br><br>
+                                <div class='panel panel-body'>Layout Image for your Theme Goes Here<br><br></div>
                                 <div class='panel panel-default'>
                                     <div class='panel panel-body'>
                                         <table class="table">
@@ -214,7 +214,6 @@ class CustomDashboardForm(forms.ModelForm):
                                                 <th>Component Type</th>
                                                 <th>Component Name</th>
                                                 <th>Data Type</th>
-                                                <th>Data Source Type</th>
                                                 <th>Select Data Source(s)</th>
                                                 <th></th>
                                                 <th>Add New Data Source</th>
@@ -229,10 +228,7 @@ class CustomDashboardForm(forms.ModelForm):
                                                         <td>{% if component.component_name %}
                                                                 {{component.component_name}}
                                                             {% else %} N/A {% endif %} </td>
-                                                        <td>{% if component.data_reqiored %}
-                                                                {{component.data_required}}
-                                                            {% else %} N/A {% endif %} </td>
-                                                        <td><div class="form-group" style="width: 75%;"> 
+                                                        <td><div class="form-group" style="margin-right: 2em;"> 
                                                                 <select class="form-control" id="sel2">
                                                                     <option value="external"> External </option>
                                                                     <option value="internal"> Internal </option>
@@ -251,18 +247,7 @@ class CustomDashboardForm(forms.ModelForm):
                                                         </td>
                                                         <td></td>
                                                         <td><a class="dashboards" data-toggle="modal" data-target="#myModal" href='configurabledashboard/data_add/'> New </a></td>
-                                                        {% for component in getCustomDashboard.components.all %}
-                                                            <td>{{component.component_name}}</td>
-                                                            <td>{{component.data_required}} </td>
-                                                            <td><a class="dashboards" data-toggle="modal" data-target="#myModal" href='configurabledashboard/component/{{pk}}/'>View</a></td>
-                                                            <td>{% if component.data_sources %} Yes 
-                                                                {% else %} 
-                                                                No
-                                                                {% endif %}
-                                                            </td>  
-                                                            <td> <a class="dashboards" data-toggle="modal" data-target="#myModal" href='configurabledashboard/data_add/'> New </a></td>
 
-                                                        {% endfor %}
                                                         
                                                     </tr>
                                                 {% endfor %}

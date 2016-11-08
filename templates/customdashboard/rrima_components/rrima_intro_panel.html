@@ -1,1 +1,23 @@
-rrima_intro_panel.html
+<div class='row' style='padding: 1em 0 1em 0;'>
+    <div class='col-lg-9 col-md-12 col-sm-12' style='height: 100; overflow-y: scroll; color: #4d525a; padding-left: 3em; padding-bottom: 2em; padding-right: 4em; text-align: left;' >
+        <h3 id="projectHome">{{tolaPartner.title}}</h3>
+        <p>With <a href="{{tolaPartner.url}}" style="color: #0065a2;"><u>{{tolaPartner.name}}</u></a> funding, <strong>Mercy Corps’ {{tolaPartner.MC_project_name}}</strong> team aims to:</p>
+        <div class='row' style='margin-left: 2em; margin-right: 4em; padding: 1em 2em 1em 2em; '>
+            <div style='text-align: center;'>
+                {% for objective in tolaPartner.objectives}
+                <span class='highlight-title'>
+                    <strong>{{objective}} </strong>
+                </span>
+                <span style='color: black;'>{{objective.description}}, </span>
+                {% endfor %}
+            </div>                  
+        </div>
+    </div>
+    <div class='col-lg-3 col-md-4 col-sm-6 col-xs-6' style='background-color: white; padding: 0em 2em 0em 2em; margin-top: 2em; float:left'>
+        <div class="panel-body">
+            <img src='{{parner_funding.logo}}' style='background-color: white; height: 7.813em; padding: .5em 0 .5em .5em; float: right; border: none;'>
+            <img src="{{STATIC_URL}}/img/MC_Logo.png" style='background-color: white; height: 7.813em; padding: .5em; float: right; border: none;'>
+        
+        </div>
+    </div>
+</div>

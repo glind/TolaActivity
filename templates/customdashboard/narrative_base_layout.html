@@ -95,31 +95,9 @@
             <div class="tab-content">
                 <div id="menu0" class="tab-pane fade in active">
                     <div class='container-fluid col-lg-12 dark-white-gradient wide-width-padding'>
-
-                        <div class='row' style='padding: 1em 0 1em 0;'>
-                            <div class='col-lg-9 col-md-12 col-sm-12' style='height: 100; overflow-y: scroll; color: #4d525a; padding-left: 3em; padding-bottom: 2em; padding-right: 4em; text-align: left;' >
-                                <h3 id="projectHome">{{pageText.projectSummary.title}}</h3>
-                                {% if partner_funding %}
-                                <p>With <a href="{{partner_funding.url}}" style="color: #0065a2;"><u>{{partner_funding.name}}</u></a> funding, <strong>Mercy Corps’ {{parner_funding.MC_project_name}}</strong> team aims to:</p>
-                                <div class='row' style='margin-left: 2em; margin-right: 4em; padding: 1em 2em 1em 2em; '>
-                                    <div style='text-align: center;'>
-                                        {% for objective in partner_funding.objectives}
-                                        <span class='highlight-title'>
-                                            <strong>{{objective}} </strong>
-                                        </span>
-                                        <span style='color: black;'>{{objective.description}}, </span>
-                                    </div>                  
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class='col-lg-3 col-md-4 col-sm-6 col-xs-6' style='background-color: white; padding: 0em 2em 0em 2em; margin-top: 2em; float:left'>
-                                <div class="panel-body">
-                                    <img src='{{parner_funding.logo}}' style='background-color: white; height: 7.813em; padding: .5em 0 .5em .5em; float: right; border: none;'>
-                                    <img src="{{STATIC_URL}}/img/MC_Logo.png" style='background-color: white; height: 7.813em; padding: .5em; float: right; border: none;'>
-                                
-                                </div>
-                            </div>
-                        </div>
+                      {% with rrimaECHO as tolaPartner %}
+                        {% include 'customdashboard/rrima_components/rrima_intro_panel.html' %}
+                      {% endwith %}
                     </div>
 
                     <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-bottom-padding'>
@@ -164,54 +142,9 @@
                           <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
                             Profile Goes Here
                           </div>
-            <!--              <div class="modal-footer">
-                              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                          </div> -->
                         </div>
                       </div>
                     </div>
-
-                    <!-- Jupyter Report Modal -->
-                    <div id="reportModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newsModalLabel" aria-hidden="true">
-                      <div class="modal-dialog modal-wide-display" role="document">
-
-                        <!-- Modal content-->
-                        <div class="modal-content modal-full-height">
-                          <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <strong><h3 class="modal-title"> RRIMA Report</h3></strong>
-                          </div>
-                          <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
-                            <iframe style="position: absolute; height: 100%; top: 0; right: 0; border: none; width: 100%;" src="/media/{{ getNotebook.file }}"></iframe><
-                          </div>
-            <!--              <div class="modal-footer">
-                              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                          </div> -->
-                        </div>
-                      </div>
-                    </div>
-                    {% if newsDisplay %}
-                    <div id="newsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newsModalLabel" aria-hidden="true">
-                      <div class="modal-dialog modal-wide-display" role="document">
-
-                        <!-- Modal content-->
-                        <div class="modal-content modal-full-height">
-                          <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <strong><h3 class="modal-title">{{newsDisplay.title}}</h3></strong>
-                          </div>
-                          {% for news in newsDisplay.news %}
-                          <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
-                            <div>
-                                <h3><a href="{{news.link}}">{{news.title|upper}}</a></h3>
-                                <p>{{news.summary}}</p>
-                            </div>
-                          </div>
-                          {% endfor %}
-                        </div>
-                      </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
     <!-- footer -->

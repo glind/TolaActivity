@@ -7,7 +7,6 @@ from django.contrib.sites.models import Site
 from decimal import Decimal
 from datetime import datetime
 import uuid
-from django.utils.timezone import utc
 
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -130,6 +129,12 @@ class TolaUser(models.Model):
             self.create_date = datetime.now()
         self.edit_date = datetime.now()
         super(TolaUser, self).save()
+
+
+class TolaUserProxy(TolaUser):
+    class Meta:
+        verbose_name, verbose_name_plural = u"Report Tola User", u"Report Tola Users"
+        proxy = True
 
 
 class TolaUserAdmin(admin.ModelAdmin):
@@ -1229,6 +1234,7 @@ class BudgetAdmin(admin.ModelAdmin):
     list_display = ('contributor', 'description_of_contribution', 'proposed_value', 'create_date', 'edit_date')
     display = 'Budget'
 
+
 # TODO Move to new "formlibrary" app
 class TrainingAttendance(models.Model):
     training_name = models.CharField(max_length=255)
@@ -1276,6 +1282,7 @@ class TrainingAttendanceAdmin(admin.ModelAdmin):
     list_display = ('training_name', 'program', 'project_agreement', 'create_date', 'edit_date')
     display = 'Training Attendance'
     list_filter = ('program__country','program')
+
 
 # TODO Move to new "formlibrary" app
 class Beneficiary(models.Model):
@@ -1369,6 +1376,7 @@ class ChecklistItemAdmin(admin.ModelAdmin):
     list_display = ('item','checklist','in_file')
     list_filter = ('checklist','global_item')
 
+
 # TODO Delete not in use
 # Documentation
 class DocumentationApp(models.Model):
@@ -1416,6 +1424,7 @@ class Feedback(models.Model):
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ('submitter', 'note', 'page', 'severity', 'create_date',)
     display = 'Feedback'
+
 
 # TODO Delete not in use
 # FAQ
@@ -1505,6 +1514,7 @@ def get_user_country(request):
         response = "undefined"
         return response
 
+
 # TODO Move to new "formlibrary" app
 class Distribution(models.Model):
     distribution_name = models.CharField(max_length=255)
@@ -1559,3 +1569,4 @@ class Distribution(models.Model):
 class DistributionAdmin(admin.ModelAdmin):
     list_display = ('distribution_name', 'program', 'initiation', 'create_date', 'edit_date')
     display = 'Program Dashboard'
+

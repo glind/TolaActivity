@@ -37,7 +37,8 @@ def DefaultCustomDashboard(request,id=0,sector=0,status=0):
     getApprovedCount = ProjectAgreement.objects.all().filter(program__id=program_id, approval='approved', program__country__in=countries).count()
     getRejectedCount = ProjectAgreement.objects.all().filter(program__id=program_id, approval='rejected', program__country__in=countries).count()
     getInProgressCount = ProjectAgreement.objects.all().filter(Q(Q(approval='in progress') | Q(approval="") | Q(approval=None)),program__id=program_id, program__country__in=countries).count()
-    nostatus_count = ProjectAgreement.objects.all().filter(Q(Q(approval=None) | Q(approval=""))).count()
+    nostatus_count = ProjectAgreement.objects.all().filter(program__id=program_id).filter(Q(Q(approval=None) | Q(approval=""))).count()
+
 
 
     getSiteProfile = SiteProfile.objects.all().filter(Q(projectagreement__program__id=program_id) | Q(collecteddata__program__id=program_id))
@@ -322,6 +323,7 @@ def RRIMAPublicDashboard(request,id=0):
     getProgram = Program.objects.all().filter(id=program_id)
     getNotebooks = JupyterNotebooks.objects.all().filter(very_custom_dashboard="RRIMA") #is there a filter on this?
 
+
     ## retrieve the coutries the user has data access for
     countries = getCountry(request.user)
 
@@ -330,7 +332,6 @@ def RRIMAPublicDashboard(request,id=0):
 
     pageText = {}
     pageText['pageTitle'] = "Refugee Response and Migration News"
-    pageText['projectSummary'] = {}
 
     pageMap = [{"latitude":39.9334, "longitude":32.8597, "location_name":"Ankara","site_contact":"Sonal Shinde, Migration Response Director, sshinde@mercycorps.org", "site_description":"Migration Response Coordination","region_name":"Turkey"},
         {"latitude":38.4237, "longitude":27.1428, "location_name":"Izmir","site_contact":"Tracy Lucas, Emergency Program Manager, ECHO Aegean Response, tlucas@mercycorps.org", "site_description":"Cash, Information Dissemination, Youth, Protection", "region_name":"Turkey"},
@@ -345,7 +346,6 @@ def RRIMAPublicDashboard(request,id=0):
 
     return render(request, 'customdashboard/narrative_base_layout.html', 
         {'getNotebooks': getNotebooks, 'pageText': pageText, 'pageNews': pageNews, 'pageImages': pageImages, 'pageMap': pageMap,'getProgram': getProgram, 'countries': countries, 'getProjects': getProjects}) #add data 
-
 
 
 def Gallery(request,id=0):

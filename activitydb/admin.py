@@ -1,9 +1,11 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
 from .models import *
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 from import_export.admin import ImportExportModelAdmin
 from tola.util import getCountry
+from admin_report.mixins import ChartReportAdmin
 
 
 # Resource for CSV export
@@ -136,9 +138,9 @@ class SiteProfileAdmin(ImportExportModelAdmin):
 
 
 class ProgramAdmin(admin.ModelAdmin):
-    list_display = ('countries','name','gaitid', 'description','budget_check')
+    list_display = ('countries','name','gaitid', 'description','budget_check','funding_status')
     search_fields = ('name','gaitid')
-    list_filter = ('funding_status','country','budget_check')
+    list_filter = ('funding_status','country','budget_check','funding_status')
     display = 'Program'
 
 
@@ -152,6 +154,21 @@ class StakeholderAdmin(ImportExportModelAdmin):
     list_display = ('name', 'type', 'country', 'sector', 'approval', 'approved_by', 'filled_by', 'create_date')
     display = 'Stakeholder List'
     list_filter = ('country', 'type', 'sector')
+
+class ReportTolaUserAdmin(ChartReportAdmin):
+
+    list_display = ('title','name', 'user','email', 'country', 'create_date')
+    list_filter = ('country', 'create_date')
+
+
+
+    def email(self, data):
+        auth_users = User.objects.all()
+        for a_user in auth_users:
+            if data.user == a_user:
+                email = a_user.email
+        return email
+
 
 admin.site.register(Country, CountryAdmin)
 admin.site.register(Province, ProvinceAdmin)
@@ -189,3 +206,4 @@ admin.site.register(Feedback,FeedbackAdmin)
 admin.site.register(TolaUser,TolaUserAdmin)
 admin.site.register(TolaSites,TolaSitesAdmin)
 admin.site.register(FormGuidance,FormGuidanceAdmin)
+admin.site.register( TolaUserProxy, ReportTolaUserAdmin )

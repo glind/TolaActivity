@@ -1,0 +1,40 @@
+<div class='row'>
+    <div class='col-lg-9 col-md-12 col-sm-12' style='padding: 0em 2em 0em 0em;'>
+        <h3 id="report{{tolaNotebook.id}}">{{tolaNotebook.title|upper}}</h3>
+        {% for text in tolaNotebook.text %}
+            <p> text </p>
+        {% endfor %}
+        {% if tolaNotebook.resource_links %}
+        <div style='padding: 1em 0 1em 0;'>
+            <ul style='list-style: none;'><strong>A Deeper Look...</strong>
+                {% for link in tolaNotebook.resource_links %}
+                <li><a href='{{link.url}}'>{{link.title}}</a></li> 
+                }
+            </ul>
+        </div>
+    </div>
+    <div class='col-lg-3 col-md-3  col-sm-6 col-xs-12 no-padding' style=''>
+        <div class='panel red-gradient button-selector' style='margin-top: 3em; padding: .5em .5em 2em .5em;'>
+            <div class='panel-body' style='padding-top: 0em;'><a src="{{tolaNotebook.url}}" data-toggle="modal" href="#reportModal" style='color: white; text-align: left; width: 100%;'>{{tolaNotebook.short_name|capfirst}}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Jupyter Report Modal -->
+<div id="reportModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-wide-display" role="document">
+
+    <!-- Modal content-->
+    <div class="modal-content modal-full-height">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <strong><h3 class="modal-title">tolaNotebook.title</h3></strong>
+      </div>
+      <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
+        <iframe style="position: absolute; height: 100%; top: 0; right: 0; border: none; width: 100%;" src="/media/{{ tolaNotebook.file }}"></iframe>
+      </div>
+    </div>
+  </div>
+</div>

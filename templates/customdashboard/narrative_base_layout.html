@@ -124,66 +124,31 @@
 
                     <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-bottom-padding'>
                         <div class='row' >
-                            <!-- <div class='col-lg-1'></div> -->
-                            <div class='col-lg-12' style="height: 150; padding-bottom: 2em;">
-                                <h3 id="programhub" style='text-align: right;'>{{locations.title|capfirst }}</h3>
-                                <div style='padding-bottom: 2em;'><h4><strong>{{locations.subtitle|capfirst }}</strong></h4>
-                               {{locations.summary_text}}</div>
-                                {% with pageMap as tolaMapData %}
-                                    {% include 'customdashboard/rrima_components/rrima_map.html' %}
-                                {% endwith %}
-                            </div>
+                          {% with pageMap as tolaMapData %}
+                              {% include 'customdashboard/rrima_components/rrima_map.html' %}
+                          {% endwith %}
                         </div>
                     </div>
                     <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-padding'>
                         <div class='row'>
-                            <div class='col-lg-10 col-md-12 col-sm-12' style='border-radius: 0.313em; float: left; width:100%; overflow-y: scroll; box-shadow: 0.063em 0.063em 0.063em 0.063em #8b8b8b inset;'>
-                                <h3 id="timeline">{{timeline.title}}</h3>
-                                <div style='padding-bottom: 1.5em;'>{{timelines.summary}}</div>
-                                <iframe src='{{timeline.link}}' width='1000' height='450' frameborder='0' style="padding-left: 9em;"></iframe>
-                            </div>
-                            <div class='col-lg-1'></div>
+                          {% with rrimaTimeline as tolaTimeline %}
+                            {% include 'customdashboard/rrima_components/timeline.html' %}
+                          {% endwith %}
                         </div>
                     </div>
                     <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-padding'>
                         {% for notebook in getNotebooks %}
-                        <div class='row'>
-                            <div class='col-lg-9 col-md-12 col-sm-12' style='padding: 0em 2em 0em 0em;'>
-                                <h3 id="report{{notebook.id}}">{{notebook.title|upper}}</h3>
-                                {% for text in notebook.text %}
-                                    <p> text </p>
-                                {% endfor %}
-                                {% if notebook.resource_links %}
-                                <div style='padding: 1em 0 1em 0;'>
-                                    <ul style='list-style: none;'><strong>A Deeper Look...</strong>
-                                        {% for link in notebook.resource_links %}
-                                        <li><a href='{{link.url}}'>{{link.title}}</a></li> 
-                                        }
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class='col-lg-3 col-md-3  col-sm-6 col-xs-12 no-padding' style=''>
-                                <div class='panel red-gradient button-selector' style='margin-top: 3em; padding: .5em .5em 2em .5em;'>
-                                    <div class='panel-body' style='padding-top: 0em;'><a src="{{report.url}}" data-toggle="modal" href="#reportModal" style='color: white; text-align: left; width: 100%;'>{{notebook.name|capfirst}}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                           {% with notebook as tolaNotebook %}
+                              {% include 'customdashboard/rrima_components/notebook_listing.html' %}
+                          {% endwith %}
                         {% endfor %}
                     </div>      
 
                     <div class='container-fluid col-lg-12 col-md-12 col-sm-12 dark-white-gradient wide-width-bottom-padding'>
-                        <div style='width: 100%; padding: 0em 2em 0em 0;'>
-                            <h3 id="newsresources" style='padding: 1em 0 1em 0;'>{{pageNews.title}}</h3>
-                            <ul style='width: 100%;'>
-                            {% for newsLink in pageNews.sources %}
-                                <li class='col-lg-3 col-md-4 col-sm-6 col-xs-12' style='list-style: none;'>
-                                    <div class='panel red-gradient button-selector'><div class='panel-body' style='padding-top: 0em;'><a href='{{news.url}}' style='color: white; text-align: left; width: 100%;'>{{news.title|upper}}</a><br></div>
-                                    </div>
-                                </li>
-                             </ul>
-                        </div>
-                    <div class='container-fluid'></div>
+                          {% with rrimaNews as tolaResources %}
+                            {% include 'customdashboard/rrima_components/resource_listing.html' %}
+                          {% endwith %}
+                    </div>
 
             <!-- ***** PAGE MODALS ********* -->
                     <!-- Household Profile Modal -->
@@ -235,12 +200,14 @@
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                             <strong><h3 class="modal-title">{{newsDisplay.title}}</h3></strong>
                           </div>
+                          {% for news in newsDisplay.news %}
                           <div class="modal-body modal-full-height" style='word-wrap: break-word; overflow-y: auto;'>
                             <div>
                                 <h3><a href="{{news.link}}">{{news.title|upper}}</a></h3>
                                 <p>{{news.summary}}</p>
                             </div>
                           </div>
+                          {% endfor %}
                         </div>
                       </div>
                     </div>

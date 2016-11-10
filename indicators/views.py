@@ -315,10 +315,18 @@ def indicator_report(request, program=0, indicator=0, type=0):
     countries = getCountry(request.user)
     getPrograms = Program.objects.all().filter(funding_status="Funded", country__in=countries).distinct()
 
+    getIndicators = Indicator.objects.select_related().filter(program__country__in=countries)
+
     getIndicatorTypes = IndicatorType.objects.all()
+    program = int(program)
+
+    if program != 0:
+
+        getIndicators = Indicator.objects.select_related().filter(program = program)
+        
 
     # send the keys and vars from the json data to the template along with submitted feed info and silos for new form
-    return render(request, "indicators/report.html", {'program': program, 'getPrograms': getPrograms,'form': FilterForm(), 'helper': FilterForm.helper, 'getIndicatorTypes': getIndicatorTypes})
+    return render(request, "indicators/report.html", {'program': program, 'getPrograms': getPrograms,'form': FilterForm(), 'helper': FilterForm.helper, 'getIndicators': getIndicators, 'getIndicatorTypes': getIndicatorTypes})
 
 class IndicatorReport(View, AjaxableResponseMixin):
 

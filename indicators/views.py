@@ -338,10 +338,15 @@ class IndicatorReport(View, AjaxableResponseMixin):
         getIndicatorTypes = IndicatorType.objects.all()
 
         program = int(self.kwargs['program'])
+        indicator = int(self.kwargs['indicator'])
         type = int(self.kwargs['type'])
 
         if program != 0:
             getIndicators = Indicator.objects.all().filter(program__id=program).select_related().values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector','disaggregation','means_of_verification', 'data_collection_method', 'reporting_frequency', 'create_date', 'edit_date', 'source', 'method_of_analysis')
+
+        elif indicator != 0:
+            getIndicators = Indicator.objects.all().filter(id=indicator).select_related().values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector','disaggregation','means_of_verification', 'data_collection_method', 'reporting_frequency', 'create_date', 'edit_date', 'source', 'method_of_analysis')
+
 
         elif type != 0:
             getIndicators = Indicator.objects.all().filter(indicator_type=type).select_related().values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector','disaggregation','means_of_verification', 'data_collection_method', 'reporting_frequency', 'create_date', 'edit_date', 'source', 'method_of_analysis')

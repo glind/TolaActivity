@@ -333,19 +333,29 @@ def RRIMAPublicDashboard(request,id=0):
     pageText = {}
     pageText['pageTitle'] = "Refugee Response and Migration News"
 
-    pageMap = [{"latitude":39.9334, "longitude":32.8597, "location_name":"Ankara","site_contact":"Sonal Shinde, Migration Response Director, sshinde@mercycorps.org", "site_description":"Migration Response Coordination","region_name":"Turkey"},
+    rrimaECHO = {}
+    pageMap = {}
+    pageMap["title"] = PROGRAM HUBS 
+    pageMap["subtitle"] = "The path of a refugee…"
+    pageMap["summary_text"] = ['According to <a href="http://data.unhcr.org/mediterranean/regional.php/"><u>UNHCR</u></a>, more than 1 million migrants and refugees crossed into Europe in 2015 - the vast majority of which traveled along the Aegean Route from countries such as Syria, Afghanistan, and Iraq through Turkey, Greece and the Balkans. <strong>Mercy Corps is strategically positioned</strong> with teams in active areas along the Aegean Migration Route.']
+    pageMap["mapData"] = [{"latitude":39.9334, "longitude":32.8597, "location_name":"Ankara","site_contact":"Sonal Shinde, Migration Response Director, sshinde@mercycorps.org", "site_description":"Migration Response Coordination","region_name":"Turkey"},
         {"latitude":38.4237, "longitude":27.1428, "location_name":"Izmir","site_contact":"Tracy Lucas, Emergency Program Manager, ECHO Aegean Response, tlucas@mercycorps.org", "site_description":"Cash, Information Dissemination, Youth, Protection", "region_name":"Turkey"},
         {"latitude":37.0660, "longitude":37.3781, "location_name":"Gaziantep","site_contact":"Jihane Nami, Director of Programs Turkey, jnami@mercycorps.org", "site_description":"Cash, NFI, Shelter, Protection, Information Dissemination","region_name":"Turkey"},
         {"latitude":39.2645, "longitude":26.2777, "location_name":"Lesvos", "site_contact":"Chiara Bogoni, Island Emergency Program Manager, cbogoni@mercycorps.org", "site_description":"Cash, Youth Programs, Food","region_link":"Greece"},
         {"latitude":37.9838, "longitude":23.7275, "location_name":"Athens", "site_contact":"Josh Kreger, Team Leader - Greece, jkreger@mercycorps.org and Kaja Wislinska, Team Leader - Athens and Mainland, kwislinska@mercycorps.org","site_description":"Cash, Youth Psychosocial Support, Legal Support","region_link":"Greece","region_link":"Greece"},
         {"latitude":44.7866, "longitude":20.4489, "location_name":"Belgrade","site_contact":"Radovan Jovanovic, Team Leader - Balkans, rjovanovic@mercycorps.org","site_description":"SIM Card Distribution, Information Dissemination","region_name":"Balkans"}]
 
-    pageNews = {}
-    pageNews[title] = ""
-    pageNews[sources] = [{"title":"", "url":""}, {"title":"", "url":""}, {"title":"", "url":""}, {"title":"", "url":""}, {"title":"", "url":""}, {"title":"", "url":""} ]
+    rrimaTimeline = {}
+    rrimaTimeline['title'] = ""
+    rrimaTimeline['summary'] = ""
+    rrimaTimeline['link'] = ""
 
+
+    rrimaNews = {}
+    rrimaNews[title] = ""
+    rriaNews[sources] = [{"title":"", "url":"", "modalDisplay": "false", "modalDisplay": "false"}, {"title":"", "url":"", "modalDisplay": "false"}, {"title":"", "url":"", "modalDisplay": "false"}, {"title":"", "url":"", "modalDisplay": "false"}, {"title":"", "url":"", "modalDisplay": "false"}, {"title":"", "url":"", "modalDisplay": "false"} ]
     return render(request, 'customdashboard/narrative_base_layout.html', 
-        {'getNotebooks': getNotebooks, 'pageText': pageText, 'pageNews': pageNews, 'pageImages': pageImages, 'pageMap': pageMap,'getProgram': getProgram, 'countries': countries, 'getProjects': getProjects}) #add data 
+        {'rrimaECHO' : rrimaECHO,'rrimaTimeline' : rrimaTimeline, 'getNotebooks': getNotebooks, 'pageText': pageText, 'rrimaNews': rrimaNews, 'pageImages': pageImages, 'pageMap': pageMap,'getProgram': getProgram, 'countries': countries, 'getProjects': getProjects}) #add data 
 
 
 def Gallery(request,id=0):

@@ -58,9 +58,11 @@ class ProgramLinksAdmin(admin.ModelAdmin):
 
 class JupyterNotebooks(models.Model):
     name = models.CharField("Notebook Name", max_length=255)
+    short_name = models.CharField("Notebook Short Name", max_length=255)
     program = models.ForeignKey(Program, blank=True,null=True)
     very_custom_dashboard = models.CharField("Specialty Custom Dashboard Links",blank=True, null=True, max_length=255)
     file = models.FileField("HTML/Jupyter Nontebook File", blank=True,null=True,upload_to="media")
+    summary_description = models.CharField("Notebook Description", max_length=255)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 

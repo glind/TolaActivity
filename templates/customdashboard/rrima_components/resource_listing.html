@@ -3,14 +3,17 @@
     <ul style='width: 100%;'>
     {% for newsLink in pageNews.sources %}
         <li class='col-lg-3 col-md-4 col-sm-6 col-xs-12' style='list-style: none;'>
+            {% if modalDisplay == "true" %}
+            <!-- trigger news modal -->
+            {% else %}
             <div class='panel red-gradient button-selector'><div class='panel-body' style='padding-top: 0em;'><a href='{{news.url}}' style='color: white; text-align: left; width: 100%;'>{{news.title|upper}}</a><br></div>
             </div>
+            {% endif %}
         </li>
      </ul>
 </div>
 
 <!-- For resources using a modal display rather than a link -->
-{% if newsDisplay %}
 <div id="newsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-wide-display" role="document">
 

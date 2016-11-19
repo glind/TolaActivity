@@ -1,6 +1,6 @@
 from import_export import resources
 from .models import Indicator, CollectedData, Country, Program, Sector, DisaggregationValue, ReportingFrequency
-from activitydb.models import ProjectAgreement, ProjectComplete, TolaUser
+from workflow.models import ProjectAgreement, ProjectComplete, TolaUser
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export import fields
@@ -8,7 +8,7 @@ from import_export import fields
 
 class IndicatorResource(resources.ModelResource):
 
-    country = fields.Field(column_name='country', attribute='country', widget=ForeignKeyWidget(Country, 'country'))
+    # country = fields.Field(column_name='country', attribute='country', widget=ManyToManyWidget(Program, field='country'))
     indicator_type = fields.Field(column_name='indicator types', attribute='indicator_types')
     objectives = fields.Field(column_name='objectives', attribute='objectives_list')
     strategic_objectives = fields.Field(column_name='strategic objectives', attribute='strategicobjectives_list')

@@ -172,6 +172,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -180,7 +181,7 @@ MIDDLEWARE_CLASSES = (
 # Add Pagination to Rest Framework lists
 REST_FRAMEWORK = {
     'PAGINATE_BY': 10,
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
@@ -211,6 +212,7 @@ DJANGO_APPS = (
     'django.contrib.humanize',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
+    'admin_report',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'social.apps.django_app.default',
@@ -233,11 +235,13 @@ THIRD_PARTY_APPS = (
 
 # Apps specific for this project go here.
 LOCAL_APPS = (
-    'activitydb',
+    'workflow',
+    'formlibrary',
     'tola',
     'feed',
     'indicators',
     'customdashboard',
+    'configurabledashboard',
     'tables',
     'reports',
 
@@ -343,9 +347,9 @@ WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 #Report Builder
-REPORT_BUILDER_INCLUDE = []
-REPORT_BUILDER_EXCLUDE = ['user','groups','read','template','silo','readtoken']
-REPORT_BUILDER_ASYNC_REPORT = False
+# REPORT_BUILDER_INCLUDE = []
+# REPORT_BUILDER_EXCLUDE = ['user','groups','read','template','silo','readtoken']
+# REPORT_BUILDER_ASYNC_REPORT = False
 
 #wysiwyg settings
 DJANGO_WYSIWYG_FLAVOR = "ckeditor"

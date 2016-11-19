@@ -50,6 +50,7 @@
                        <span class="label label-success">Approved &nbsp;<span class="badge">{{ getApprovedCount }}</span></span>
                        <span class="label label-success">Awaiting Approval &nbsp;<span class="badge">{{ getAwaitingApprovalCount }}</span></span>
                        <span class="label label-success">In Progress &nbsp;<span class="badge">{{ getRejectedCount }}</span></span>
+                       <span class="label label-success">New &nbsp;<span class="badge">{{ nostatus_count }}</span></span>
                        <span class="label label-success">Rejected &nbsp;<span class="badge">{{ getInProgressCount }}</span></span>
 
                       </a>
@@ -351,7 +352,7 @@
                 <!-- The map -->
                 <div class="row">
                     <div class="panel panel-info">
-                        <div class="panel-heading"><b>Project Sites</b> {% if getFilteredName %} for <a href="/activitydb/dashboard/{{ getFilteredName.id }}">{{ getFilteredName }}</a> {% endif %}</div>
+                        <div class="panel-heading"><b>Project Sites</b> {% if getFilteredName %} for <a href="/workflow/dashboard/{{ getFilteredName.id }}">{{ getFilteredName }}</a> {% endif %}</div>
                         <div class="panel-body">
 
                             <style>

@@ -2,13 +2,13 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from .models import Indicator, DisaggregationLabel, DisaggregationValue, CollectedData, IndicatorType, Level, ExternalServiceRecord, ExternalService, TolaTable
-from activitydb.models import Program, SiteProfile, Country, Sector, TolaSites, TolaUser, FormGuidance
+from workflow.models import Program, SiteProfile, Country, Sector, TolaSites, TolaUser, FormGuidance
 from django.shortcuts import render_to_response
 from django.contrib import messages
 from tola.util import getCountry, get_table
 from tables import IndicatorTable, IndicatorDataTable
 from django_tables2 import RequestConfig
-from activitydb.forms import FilterForm
+from workflow.forms import FilterForm
 from .forms import IndicatorForm, CollectedDataForm
 
 from django.db.models import Count, Sum
@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 
-from activitydb.mixins import AjaxableResponseMixin
+from workflow.mixins import AjaxableResponseMixin
 import json
 
 import requests
@@ -56,12 +56,14 @@ class IndicatorList(ListView):
         getPrograms = Program.objects.all().filter(country__in=countries, funding_status="Funded").distinct()
         getIndicatorTypes = IndicatorType.objects.all()
 
+        print int(self.kwargs['program'])
+
         if int(self.kwargs['program']) != 0:
             getProgramsIndicator = Program.objects.all().filter(id=self.kwargs['program']).order_by('name').annotate(indicator_count=Count('indicator'))
         elif int(self.kwargs['indicator']) != 0:
             getProgramsIndicator = Program.objects.all().filter(indicator=self.kwargs['indicator']).order_by('name').annotate(indicator_count=Count('indicator'))
-        if int(self.kwargs['type']) != 0:
-            getProgramsIndicator = Program.objects.all().filter(indicator=self.kwargs['indicator']).order_by('name').annotate(indicator_count=Count('indicator'))
+        elif int(self.kwargs['type']) != 0:
+            getProgramsIndicator = Program.objects.all().filter(indicator__indicator_type=self.kwargs['type']).order_by('name').annotate(indicator_count=Count('indicator'))
         else:
             getProgramsIndicator = Program.objects.all().filter(funding_status="Funded", country__in=countries).order_by('name').annotate(indicator_count=Count('indicator'))
 
@@ -188,7 +190,7 @@ class IndicatorCreate(CreateView):
         context.update({'id': self.kwargs['id']})
         return context
 
-    @method_decorator(group_excluded('ViewOnly', url='activitydb/permission'))
+    @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         return super(IndicatorCreate, self).dispatch(request, *args, **kwargs)
 
@@ -222,7 +224,7 @@ class IndicatorUpdate(UpdateView):
     model = Indicator
     template_name = 'indicators/indicator_form.html'
 
-    @method_decorator(group_excluded('ViewOnly', url='activitydb/permission'))
+    @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
             self.guidance = FormGuidance.objects.get(form="Indicator")
@@ -233,6 +235,10 @@ class IndicatorUpdate(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(IndicatorUpdate, self).get_context_data(**kwargs)
         context.update({'id': self.kwargs['pk']})
+        getIndicator = Indicator.objects.get(id=self.kwargs['pk'])
+
+        context.update({'i_name': getIndicator.name})
+
         #get external service data if any
         try:
             getExternalServiceRecord = ExternalServiceRecord.objects.all().filter(indicator__id=self.kwargs['pk'])
@@ -275,9 +281,9 @@ class IndicatorDelete(DeleteView):
     Delete and Indicator
     """
     model = Indicator
-    success_url = '/indicators/home/0/'
+    success_url = '/indicators/home/0/0/0/'
 
-    @method_decorator(group_excluded('ViewOnly', url='activitydb/permission'))
+    @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         return super(IndicatorDelete, self).dispatch(request, *args, **kwargs)
 
@@ -311,31 +317,44 @@ def indicator_report(request, program=0, indicator=0, type=0):
 
     getIndicatorTypes = IndicatorType.objects.all()
 
-    if int(program) != 0:
-        getIndicators = Indicator.objects.all().filter(program__id=program).select_related()
-
-    elif int(type) != 0:
-        getIndicators = Indicator.objects.all().filter(indicator_type=type).select_related()
-     
-    else:
-        getIndicators = Indicator.objects.all().select_related().filter(program__country__in=countries)
-
-    table = IndicatorTable(getIndicators)
-    table.paginate(page=request.GET.get('page', 1), per_page=20)
-
-    if request.method == "GET" and "search" in request.GET:
-        queryset = Indicator.objects.filter(
-                                           Q(indicator_type__indicator_type__contains=request.GET["search"]) |
-                                           Q(name__contains=request.GET["search"]) | Q(number__contains=request.GET["search"]) |
-                                           Q(number__contains=request.GET["search"]) | Q(sector__sector__contains=request.GET["search"]) |
-                                           Q(definition__contains=request.GET["search"])
-                                          )
-        table = IndicatorTable(queryset)
-
-    RequestConfig(request).configure(table)
-
     # send the keys and vars from the json data to the template along with submitted feed info and silos for new form
-    return render(request, "indicators/report.html", {'program': program, 'get_agreements': table, 'getPrograms': getPrograms,'form': FilterForm(), 'helper': FilterForm.helper, 'getIndicatorTypes': getIndicatorTypes})
+    return render(request, "indicators/report.html", {'program': program, 'getPrograms': getPrograms,'form': FilterForm(), 'helper': FilterForm.helper, 'getIndicatorTypes': getIndicatorTypes})
+
+class IndicatorReport(View, AjaxableResponseMixin):
+
+    def get(self, request,  *args, **kwargs):
+
+        countries = getCountry(request.user)
+        getPrograms = Program.objects.all().filter(funding_status="Funded", country__in=countries).distinct()
+
+        getIndicatorTypes = IndicatorType.objects.all()
+
+        program = int(self.kwargs['program'])
+        type = int(self.kwargs['type'])
+
+        if program != 0:
+            getIndicators = Indicator.objects.all().filter(program__id=program).select_related().values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector','disaggregation','means_of_verification', 'data_collection_method', 'reporting_frequency', 'create_date', 'edit_date', 'source', 'method_of_analysis')
+
+        elif type != 0:
+            getIndicators = Indicator.objects.all().filter(indicator_type=type).select_related().values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector','disaggregation','means_of_verification', 'data_collection_method', 'reporting_frequency', 'create_date', 'edit_date', 'source', 'method_of_analysis')
+         
+        else:
+            getIndicators = Indicator.objects.all().select_related().filter(program__country__in=countries).values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector','disaggregation','means_of_verification', 'data_collection_method', 'reporting_frequency', 'create_date', 'edit_date', 'source', 'method_of_analysis') 
+
+        if request.method == "GET" and "search" in request.GET:
+            getIndicators = Indicator.objects.filter(
+                                               Q(indicator_type__indicator_type__contains=request.GET["search"]) |
+                                               Q(name__contains=request.GET["search"]) | Q(number__contains=request.GET["search"]) |
+                                               Q(number__contains=request.GET["search"]) | Q(sector__sector__contains=request.GET["search"]) |
+                                               Q(definition__contains=request.GET["search"])
+                                              ).values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector','disaggregation','means_of_verification', 'data_collection_method', 'reporting_frequency', 'create_date', 'edit_date', 'source', 'method_of_analysis')
+
+        from django.core.serializers.json import DjangoJSONEncoder
+
+        get_indicators = json.dumps(list(getIndicators), cls=DjangoJSONEncoder)
+
+        return JsonResponse(get_indicators, safe=False)
+
 
 
 def programIndicatorReport(request, program=0):
@@ -425,6 +444,8 @@ def indicator_data_report(request, id=0, program=0, type=0):
     if z:
         q.update(z)
 
+        print q
+
     if request.method == "GET" and "search" in request.GET:
         queryset = CollectedData.objects.filter(**q).filter(
                                            Q(agreement__project_name__contains=request.GET["search"]) |
@@ -481,8 +502,7 @@ class IndicatorReportData(View, AjaxableResponseMixin):
             q.update(s)
 
         countries = getCountry(request.user)
-        indicator = Indicator.objects.all().filter(program__country__in=countries).filter(**q).values('id','program__name','program__id','name', 'indicator_type__indicator_type', 'sector__sector',
-                                                                                                      )
+        indicator = Indicator.objects.all().filter(program__country__in=countries).filter(**q).values('id','program__name','baseline','level__name','lop_target','program__id','external_service_record__external_service__name','key_performance_indicator','name', 'indicator_type__indicator_type', 'sector__sector',)
         indicator_count = Indicator.objects.all().filter(program__country__in=countries).filter(**q).filter(collecteddata__isnull=True).count()
         indicator_data_count = Indicator.objects.all().filter(program__country__in=countries).filter(**q).filter(collecteddata__isnull=False).count()
 
@@ -513,7 +533,9 @@ class CollectedDataReportData(View, AjaxableResponseMixin):
     :return: json dataset
     """
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
+
+        countries = getCountry(request.user)
         program = kwargs['program']
         indicator = kwargs['indicator']
         type = kwargs['type']
@@ -539,15 +561,16 @@ class CollectedDataReportData(View, AjaxableResponseMixin):
 
         getCollectedData = CollectedData.objects.all().prefetch_related('evidence', 'indicator', 'program',
                                                                         'indicator__objectives',
-                                                                        'indicator__strategic_objectives').filter(
+                                                                        'indicator__strategic_objectives').filter(program__country__in=countries).filter(
             **q).order_by(
             'indicator__program__name',
             'indicator__number').values('indicator__id','indicator__name','indicator__program__name','indicator__indicator_type__indicator_type','indicator__level__name',
                                         'indicator__sector__sector','date_collected','indicator__baseline','indicator__lop_target','indicator__key_performance_indicator',
                                         'indicator__external_service_record__external_service__name','evidence','tola_table','targeted','achieved')
 
-        collected_sum = CollectedData.objects.filter(**q).aggregate(Sum('targeted'), Sum('achieved'))
 
+        collected_sum = CollectedData.objects.filter(program__country__in=countries).filter(**q).aggregate(Sum('targeted'), Sum('achieved'))
+        
         # datetime encoding breaks without using this
         from django.core.serializers.json import DjangoJSONEncoder
         collected_serialized = json.dumps(list(getCollectedData), cls=DjangoJSONEncoder)
@@ -650,7 +673,7 @@ class CollectedDataCreate(CreateView):
     template_name = 'indicators/collecteddata_form.html'
     form_class = CollectedDataForm
 
-    @method_decorator(group_excluded('ViewOnly', url='activitydb/permission'))
+    @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
             self.guidance = FormGuidance.objects.get(form="CollectedData")
@@ -733,7 +756,7 @@ class CollectedDataCreate(CreateView):
 
         messages.success(self.request, 'Success, Data Created!')
 
-        redirect_url = '/indicators/home/0/#hidden-' + str(self.kwargs['program'])
+        redirect_url = '/indicators/home/0/0/0/#hidden-' + str(self.kwargs['program'])
         return HttpResponseRedirect(redirect_url)
 
 
@@ -744,7 +767,7 @@ class CollectedDataUpdate(UpdateView):
     model = CollectedData
     template_name = 'indicators/collecteddata_form.html'
 
-    @method_decorator(group_excluded('ViewOnly', url='activitydb/permission'))
+    @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
             self.guidance = FormGuidance.objects.get(form="CollectedData")
@@ -828,7 +851,7 @@ class CollectedDataUpdate(UpdateView):
 
         messages.success(self.request, 'Success, Data Updated!')
 
-        redirect_url = '/indicators/home/0/#hidden-' + str(getIndicator.program.id)
+        redirect_url = '/indicators/home/0/0/0/#hidden-' + str(getIndicator.program.id)
         return HttpResponseRedirect(redirect_url)
 
     form_class = CollectedDataForm
@@ -839,9 +862,9 @@ class CollectedDataDelete(DeleteView):
     CollectedData Delete
     """
     model = CollectedData
-    success_url = '/indicators/home/0/'
+    success_url = '/indicators/home/0/0/0/'
 
-    @method_decorator(group_excluded('ViewOnly', url='activitydb/permission'))
+    @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         return super(CollectedDataDelete, self).dispatch(request, *args, **kwargs)
 
@@ -994,7 +1017,8 @@ class IndicatorExport(View):
     """
     Export all indicators to a CSV file
     """
-    def get(self, *args, **kwargs ):
+    def get(self, request, *args, **kwargs ):
+
 
         if int(kwargs['id']) == 0:
             del kwargs['id']
@@ -1003,7 +1027,11 @@ class IndicatorExport(View):
         if int(kwargs['program']) == 0:
             del kwargs['program']
 
-        queryset = Indicator.objects.filter(**kwargs)
+        countries = getCountry(request.user)
+
+        queryset = Indicator.objects.filter(**kwargs).filter(program__country__in=countries)
+
+
         indicator = IndicatorResource().export(queryset)
         response = HttpResponse(indicator.csv, content_type='application/ms-excel')
         response['Content-Disposition'] = 'attachment; filename=indicator.csv'
@@ -1014,7 +1042,7 @@ class IndicatorDataExport(View):
     """
     Export all indicators to a CSV file
     """
-    def get(self, *args, **kwargs ):
+    def get(self, request, *args, **kwargs ):
 
         if int(kwargs['indicator']) == 0:
             del kwargs['indicator']
@@ -1026,7 +1054,9 @@ class IndicatorDataExport(View):
            kwargs['indicator__indicator_type__id'] = kwargs['type']
            del kwargs['type']
 
-        queryset = CollectedData.objects.filter(**kwargs)
+        countries = getCountry(request.user)
+
+        queryset = CollectedData.objects.filter(**kwargs).filter(indicator__program__country__in=countries)
         dataset = CollectedDataResource().export(queryset)
         response = HttpResponse(dataset.csv, content_type='application/ms-excel')
         response['Content-Disposition'] = 'attachment; filename=indicator_data.csv'

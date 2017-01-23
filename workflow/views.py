@@ -2,10 +2,10 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import Program, Country, Province, AdminLevelThree, District, ProjectAgreement, ProjectComplete, SiteProfile, \
-    Documentation, Monitor, Benchmarks, Budget, ApprovalAuthority, Checklist, ChecklistItem, Contact, Stakeholder, FormGuidance
+    Documentation, Monitor, Benchmarks, Budget, ApprovalAuthority, Checklist, ChecklistItem, Contact, Stakeholder, FormGuidance, \
+    TolaBookmarks, TolaUser
 from formlibrary.models import TrainingAttendance, Distribution
 from indicators.models import CollectedData, ExternalService
-from django.core.urlresolvers import reverse_lazy
 from django.utils import timezone
 
 
@@ -51,6 +51,7 @@ APPROVALS = (
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 def date_handler(obj):
@@ -114,13 +115,16 @@ class ProgramDash(ListView):
 
         countries = getCountry(request.user)
         getPrograms = Program.objects.all().filter(funding_status="Funded", country__in=countries).distinct()
-
+        filtered_program = None
         if int(self.kwargs['pk']) == 0:
             getDashboard = Program.objects.all().prefetch_related('agreement','agreement__projectcomplete','agreement__office').filter(funding_status="Funded", country__in=countries).order_by('name').annotate(has_agreement=Count('agreement'),has_complete=Count('complete'))
         else:
             getDashboard = Program.objects.all().prefetch_related('agreement','agreement__projectcomplete','agreement__office').filter(id=self.kwargs['pk'], funding_status="Funded", country__in=countries).order_by('name')
+            filtered_program = Program.objects.only('name').get(pk=self.kwargs['pk']).name
+            print filtered_program
 
         if self.kwargs.get('status', None):
+
             status = self.kwargs['status']
             if status == "in progress":
                 getDashboard.filter(Q(agreement__approval=self.kwargs['status']) | Q(agreement__approval=None))
@@ -129,7 +133,7 @@ class ProgramDash(ListView):
         else:
             status = None
 
-        return render(request, self.template_name, {'getDashboard': getDashboard, 'getPrograms': getPrograms, 'APPROVALS': APPROVALS, 'program_id':  self.kwargs['pk'], 'status': status})
+        return render(request, self.template_name, {'getDashboard': getDashboard, 'getPrograms': getPrograms, 'APPROVALS': APPROVALS, 'program_id':  self.kwargs['pk'], 'status': status, 'filtered_program': filtered_program})
 
 
 class ProjectAgreementList(ListView):
@@ -370,7 +374,7 @@ class ProjectAgreementUpdate(UpdateView):
 
             if form.instance.approval == 'approved':
                 #email the approver group so they know this was approved
-                link = "Link: " + "https://" + get_current_site(self.request).name + "/workflow/projectagreement_update/" + str(self.kwargs['pk']) + "/"
+                link = "Link: " + "https://" + get_current_site(self.request).name + "/workflow/projectagreement_detail/" + str(self.kwargs['pk']) + "/"
                 subject = "Project Initiation Approved: " + project_name
                 message = "A new initiation was approved by " + str(self.request.user) + "\n" + "Budget Amount: " + str(form.instance.total_estimated_budget) + "\n"
                 getSubmiter = User.objects.get(username=self.request.user)
@@ -378,7 +382,7 @@ class ProjectAgreementUpdate(UpdateView):
         elif str(is_approved) == "awaiting approval" and check_agreement_status.approval != "awaiting approval":
             messages.success(self.request, 'Success, Initiation has been saved and is now Awaiting Approval (Notifications have been Sent)')
             #email the approver group so they know this was approved
-            link = "Link: " + "https://" + get_current_site(self.request).name + "/workflow/projectagreement_update/" + str(self.kwargs['pk']) + "/"
+            link = "Link: " + "https://" + get_current_site(self.request).name + "/workflow/projectagreement_detail/" + str(self.kwargs['pk']) + "/"
             subject = "Project Initiation Waiting for Approval: " + project_name
             message = "A new initiation was submitted for approval by " + str(self.request.user) + "\n" + "Budget Amount: " + str(form.instance.total_estimated_budget) + "\n"
             emailGroup(country=country,group=form.instance.approved_by,link=link,subject=subject,message=message)
@@ -2207,7 +2211,6 @@ class ReportData(View, AjaxableResponseMixin):
         return JsonResponse(final_dict, safe=False)
 
 
-
 def country_json(request, country):
     """
     For populating the province dropdown based  country dropdown value
@@ -2283,9 +2286,22 @@ def export_stakeholders_list(request, **kwargs):
     return response
 
 
+def save_bookmark(request):
+    """
+    Create Bookmark from Link
+    """
+    print request.POST
+    url = request.POST['url']
+    username = request.user
+    tola_user = TolaUser.objects.get(user=username)
+
+    TolaBookmarks.objects.create(bookmark_url=url, name=url, user=tola_user)
+
+    return HttpResponse(url)
+
 
 #Ajax views for single page filtering
-class StakeholderTable(View, AjaxableResponseMixin):
+class StakeholderObjects(View, AjaxableResponseMixin):
     """
     Render Agreements json object response to the report ajax call
     """
@@ -2315,10 +2331,33 @@ class StakeholderTable(View, AjaxableResponseMixin):
         else:
             getStakeholders = Stakeholder.objects.all().filter(country__in=countries).values('id', 'create_date', 'type__name', 'name', 'sector__sector')
 
-        from django.core.serializers.json import DjangoJSONEncoder
 
         getStakeholders = json.dumps(list(getStakeholders), cls=DjangoJSONEncoder)
 
         final_dict = {'getStakeholders': getStakeholders}
 
         return JsonResponse(final_dict, safe=False)
+
+
+class DocumentationListObjects(View, AjaxableResponseMixin):
+
+    def get(self, request, *args, **kwargs):
+
+        project_agreement_id = self.kwargs['project']
+        countries = getCountry(request.user)
+        getPrograms = Program.objects.all().filter(funding_status="Funded", country__in=countries)
+
+        if int(self.kwargs['program']) != 0 & int(self.kwargs['project']) == 0:
+            getDocumentation = Documentation.objects.all().prefetch_related('program','project').filter(program__id=self.kwargs['program']).values('id', 'name', 'project__project_name', 'create_date')
+        elif int(self.kwargs['project']) != 0:
+            getDocumentation = Documentation.objects.all().prefetch_related('program','project').filter(project__id=self.kwargs['project']).values('id', 'name', 'project__project_name', 'create_date')
+        else:
+            countries = getCountry(request.user)
+            getDocumentation = Documentation.objects.all().prefetch_related('program','project','project__office').filter(program__country__in=countries).values('id', 'name', 'project__project_name', 'create_date')
+
+        getDocumentation = json.dumps(list(getDocumentation), cls=DjangoJSONEncoder)
+        final_dict  = {'getDocumentation': getDocumentation}
+
+        return JsonResponse(final_dict, safe=False)
+
+

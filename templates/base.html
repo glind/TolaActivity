@@ -42,6 +42,7 @@
 
         <!-- Hosted Leaflet -->
         <script src="{{ STATIC_URL }}js/leaflet.js"></script>
+
         {% endblock %}
 
     </head>
@@ -81,9 +82,6 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dashboards<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="/customdashboard/program_list/0/"><span class="glyphicon glyphicon-check"></span> Public Dashboards</a></li>
-                                    {% if user.is_authenticated  %}
-                                        <li><a href="/customdashboard/internal_dashboard/0/"><span class="glyphicon glyphicon-check"></span> Internal Dashboards</a></li>
-                                    {% endif %}
                                 </ul>
                             </li>
                         {% else %}
@@ -112,6 +110,7 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Reports<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="/reports/report/"><span class="glyphicon glyphicon-list-alt"></span> Program Report</a></li>
+                                    <li><a href="/customdashboard/program_list/0/"><span class="glyphicon glyphicon-list-alt"></span> Program Dashboards</a></li>
                                     <li><a href="/workflow/report/0/none"><span class="glyphicon glyphicon-list-alt"></span> Project Report</a></li>
                                     <li><a href="/indicators/collecteddata/0/0/0/"><span class="glyphicon glyphicon-list-alt"></span> Indicator Data Report</a></li>
                                     <li><a href="/indicators/data/0/0/0/"><span class="glyphicon glyphicon-list-alt"></span> Indicator Visual Report</a></li>
@@ -142,6 +141,24 @@
                                 <li><a href="{% url 'profile' %}"><span>{{ user.tola_user.countries_list }}</span></a></li>
                             </ul>
                         </li><!-- .dropdown collapse -->
+                        <!--- bookmarks --->
+                        <li class="dropdown-submenu">
+                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                 <span class="glyphicon glyphicon-bookmark"></span> Bookmarks<b class="caret"></b>
+                             </a>
+                             <ul class="dropdown-menu" id="bookmarks">
+                                 {% if request.path in user.tola_user.tolabookmark.bookmark_url %}
+                                    <li>This page is in your bookmarks!</li>
+                                 {% else %}
+                                    <li><a onClick="newBookmark('{{ request.path }}','{{ user }}')"><span class="glyphicon glyphicon-star-empty"></span> <b>Bookmark Current Page</b></a></li>
+                                 {% endif %}
+                                 {% if user.tola_user.tolabookmark %}
+                                     {% for bookmark in user.tola_user.tolabookmark.all %}
+                                        <li><a href="{{ bookmark.bookmark_url }}"><span class="glyphicon glyphicon-star"></span> {{ bookmark.name }}</a></li>
+                                     {% endfor %}
+                                 {% endif %}
+                             </ul>
+                        </li>
                     </ul>
                     {% else %}
                     <ul class="nav navbar-nav navbar-right">

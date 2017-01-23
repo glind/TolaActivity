@@ -22,6 +22,7 @@ build
 
 #allvritualenv
 venv/
+venv-ta/
 
 config/
 
@@ -39,3 +40,4 @@ error.log
 *.secret
 *.secret.yml
 assets/
+local.py

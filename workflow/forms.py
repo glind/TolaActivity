@@ -90,6 +90,13 @@ class BudgetForm(forms.ModelForm):
 
         super(BudgetForm, self).__init__(*args, **kwargs)
 
+        try:
+            countries = getCountry(self.request.user)
+        except Exception, e:
+            countries = []
+
+        self.fields['agreement'].queryset = ProjectAgreement.objects.filter(program__country__in = countries)
+
     def save(self, *args, **kwargs):
         # Commit is already set to false
         obj = super(BudgetForm, self).save(*args, **kwargs)
@@ -650,6 +657,7 @@ class ProjectAgreementSimpleForm(forms.ModelForm):
         self.fields['program'].queryset = Program.objects.filter(funding_status="Funded", country__in=countries).distinct()
         self.fields['approved_by'].queryset = TolaUser.objects.filter(country__in=countries).distinct()
         self.fields['reviewed_by'].queryset = TolaUser.objects.filter(country__in=countries).distinct()
+        self.fields['estimated_by'].queryset = TolaUser.objects.filter(country__in=countries).distinct()
 
         #override the office queryset to use request.user for country
         self.fields['office'].queryset = Office.objects.filter(province__country__in=countries)
@@ -1238,6 +1246,7 @@ class ProjectCompleteSimpleForm(forms.ModelForm):
         # override the program queryset to use request.user for country
         countries = getCountry(self.request.user)
         self.fields['program'].queryset = Program.objects.filter(funding_status="Funded", country__in=countries)
+        #self.fields['project_agreement'].queryset = ProjectAgreement.objects.filter(program__country__in = countries)
         self.fields['approved_by'].queryset = TolaUser.objects.filter(country__in=countries).distinct()
 
         # override the office queryset to use request.user for country
@@ -1259,6 +1268,7 @@ class ProjectCompleteSimpleForm(forms.ModelForm):
             self.fields['approved_by'].widget.attrs['disabled'] = "disabled"
             self.fields['approval_remarks'].widget.attrs['disabled'] = "disabled"
             self.fields['approval'].help_text = "Approval level permissions required"
+            self.fields['project_agreement'].widget.attrs['disabled'] = "disabled"
 
 
 class SiteProfileForm(forms.ModelForm):
@@ -1371,6 +1381,7 @@ class SiteProfileForm(forms.ModelForm):
 
         #override the office queryset to use request.user for country
         countries = getCountry(self.request.user)
+        self.fields['date_of_firstcontact'].label = "Date of First Contact"
         self.fields['office'].queryset = Office.objects.filter(province__country__in=countries)
         self.fields['province'].queryset = Province.objects.filter(country__in=countries)
         self.fields['approved_by'].queryset = TolaUser.objects.filter(country__in=countries).distinct()
